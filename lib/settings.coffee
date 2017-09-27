@@ -127,7 +127,13 @@ Settings =
   defaults:
     scrollStepSize: 60
     smoothScroll: true
-    keyMappings: "# Insert your preferred key mappings here."
+    keyMappings: """
+    map R reload hard
+    map X Marks.activateCreateMode swap
+    map Z Marks.activateGotoMode swap
+    map <a-\> passNextKey normal
+    # Insert your preferred key mappings here.
+    """
     linkHintCharacters: "sadfjklewcmpgh"
     linkHintNumbers: "0123456789"
     filterLinkHints: false
@@ -136,14 +142,13 @@ Settings =
       """
       div > .vimiumHintMarker {
       /* linkhint boxes */
-      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF785),
-        color-stop(100%,#FFC542));
-      border: 1px solid #E3BE23;
+      background: #ffaf0f;
+      border: none;
       }
 
       div > .vimiumHintMarker span {
       /* linkhint text */
-      color: black;
+      color: #111;
       font-weight: bold;
       font-size: 12px;
       }
@@ -156,6 +161,9 @@ Settings =
       [
         # Disable Vimium on Gmail.
         { pattern: "https?://mail.google.com/*", passKeys: "" }
+        { pattern: "https?://www.youtube.com/*", passKeys: "h j k l m c f" }
+        { pattern: "https?://gitlab.com/*", passKeys: "s t g i c" }
+        { pattern: "https?://github.com/*", passKeys: "s t g i c" }
       ]
 
     # NOTE: If a page contains both a single angle-bracket link and a double angle-bracket link, then in
@@ -179,18 +187,18 @@ Settings =
       # (Vimium supports search completion Wikipedia, as
       # above, and for these.)
       #
-      # g: https://www.google.com/search?q=%s Google
-      # l: https://www.google.com/search?q=%s&btnI I'm feeling lucky...
-      # y: https://www.youtube.com/results?search_query=%s Youtube
-      # gm: https://www.google.com/maps?q=%s Google maps
-      # b: https://www.bing.com/search?q=%s Bing
-      # d: https://duckduckgo.com/?q=%s DuckDuckGo
-      # az: https://www.amazon.com/s/?field-keywords=%s Amazon
-      # qw: https://www.qwant.com/?q=%s Qwant
+      g: https://www.google.com/search?q=%s Google
+      l: https://www.google.com/search?q=%s&btnI I'm feeling lucky...
+      y: https://www.youtube.com/results?search_query=%s Youtube
+      gm: https://www.google.com/maps?q=%s Google maps
+      b: https://www.bing.com/search?q=%s Bing
+      d: https://duckduckgo.com/?q=%s DuckDuckGo
+      az: https://www.amazon.com/s/?field-keywords=%s Amazon
+      qw: https://www.qwant.com/?q=%s Qwant
       """
     newTabUrl: "about:newtab"
     grabBackFocus: false
-    regexFindMode: false
+    regexFindMode: true
     waitForEnterForFilteredHints: false # Note: this defaults to true for new users; see below.
 
     settingsVersion: ""

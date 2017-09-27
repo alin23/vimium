@@ -189,6 +189,16 @@ Commands =
       "previousTab",
       "nextTab",
       "visitPreviousTab",
+      "tab0",
+      "tab1",
+      "tab2",
+      "tab3",
+      "tab4",
+      "tab5",
+      "tab6",
+      "tab7",
+      "tab8",
+      "tab9",
       "firstTab",
       "lastTab",
       "duplicateTab",
@@ -235,44 +245,45 @@ Commands =
 
 defaultKeyMappings =
   "?": "showHelp"
-  "j": "scrollDown"
-  "k": "scrollUp"
-  "h": "scrollLeft"
-  "l": "scrollRight"
-  "gg": "scrollToTop"
-  "G": "scrollToBottom"
-  "zH": "scrollToLeft"
-  "zL": "scrollToRight"
+  "s": "scrollDown"
+  "w": "scrollUp"
+  "a": "scrollLeft"
+  "d": "scrollRight"
+  "W": "scrollToTop"
+  "S": "scrollToBottom"
+  "A": "scrollToLeft"
+  "D": "scrollToRight"
   "<c-e>": "scrollDown"
   "<c-y>": "scrollUp"
 
-  "d": "scrollPageDown"
-  "u": "scrollPageUp"
+  "<c-s>": "scrollPageDown"
+  "<c-w>": "scrollPageUp"
   "r": "reload"
   "gs": "toggleViewSource"
 
-  "i": "enterInsertMode"
+  "I": "enterInsertMode"
   "v": "enterVisualMode"
   "V": "enterVisualLineMode"
 
-  "H": "goBack"
-  "L": "goForward"
+  ",": "goBack"
+  ".": "goForward"
   "gu": "goUp"
   "gU": "goToRoot"
 
-  "gi": "focusInput"
+  "i": "focusInput"
 
   "f": "LinkHints.activateMode"
   "F": "LinkHints.activateModeToOpenInNewTab"
-  "<a-f>": "LinkHints.activateModeWithQueue"
+  "q": "LinkHints.activateModeWithQueue"
+  "<c-d>": "LinkHints.activateModeToDownloadLink"
   "yf": "LinkHints.activateModeToCopyLinkUrl"
 
   "/": "enterFindMode"
   "n": "performFind"
   "N": "performBackwardsFind"
 
-  "[[": "goPrevious"
-  "]]": "goNext"
+  "[": "goPrevious"
+  "]": "goNext"
 
   "yy": "copyCurrentUrl"
 
@@ -281,19 +292,30 @@ defaultKeyMappings =
 
   "K": "nextTab"
   "J": "previousTab"
-  "gt": "nextTab"
-  "gT": "previousTab"
-  "^": "visitPreviousTab"
-  "<<": "moveTabLeft"
-  ">>": "moveTabRight"
+  "'": "nextTab"
+  ";": "previousTab"
+  "\\": "visitPreviousTab"
+  "<": "moveTabLeft"
+  ">": "moveTabRight"
   "g0": "firstTab"
   "g$": "lastTab"
 
-  "W": "moveTabToNewWindow"
-  "t": "createTab"
+  "0": "tab0"
+  "1": "tab1"
+  "2": "tab2"
+  "3": "tab3"
+  "4": "tab4"
+  "5": "tab5"
+  "6": "tab6"
+  "7": "tab7"
+  "8": "tab8"
+  "9": "tab9"
+
+  "<c-w>": "moveTabToNewWindow"
+  "T": "createTab"
   "yt": "duplicateTab"
   "x": "removeTab"
-  "X": "restoreTab"
+  "z": "restoreTab"
 
   "<a-p>": "togglePinTab"
   "<a-m>": "toggleMuteTab"
@@ -301,13 +323,13 @@ defaultKeyMappings =
   "o": "Vomnibar.activate"
   "O": "Vomnibar.activateInNewTab"
 
-  "T": "Vomnibar.activateTabSelection"
+  "t": "Vomnibar.activateTabSelection"
 
   "b": "Vomnibar.activateBookmarks"
   "B": "Vomnibar.activateBookmarksInNewTab"
 
-  "ge": "Vomnibar.activateEditUrl"
-  "gE": "Vomnibar.activateEditUrlInNewTab"
+  "l": "Vomnibar.activateEditUrl"
+  "L": "Vomnibar.activateEditUrlInNewTab"
 
   "gf": "nextFrame"
   "gF": "mainFrame"
@@ -379,6 +401,17 @@ commandDescriptions =
   visitPreviousTab: ["Go to previously-visited tab", { background: true }]
   firstTab: ["Go to the first tab", { background: true }]
   lastTab: ["Go to the last tab", { background: true }]
+
+  tab0: ["Go to tab 0", { background: true }]
+  tab1: ["Go to tab 1", { background: true }]
+  tab2: ["Go to tab 2", { background: true }]
+  tab3: ["Go to tab 3", { background: true }]
+  tab4: ["Go to tab 4", { background: true }]
+  tab5: ["Go to tab 5", { background: true }]
+  tab6: ["Go to tab 6", { background: true }]
+  tab7: ["Go to tab 7", { background: true }]
+  tab8: ["Go to tab 8", { background: true }]
+  tab9: ["Go to tab 9", { background: true }]
 
   createTab: ["Create new tab", { background: true, repeatLimit: 20 }]
   duplicateTab: ["Duplicate current tab", { background: true, repeatLimit: 20 }]

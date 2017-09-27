@@ -220,6 +220,16 @@ BackgroundCommands =
   previousTab: (request) -> selectTab "previous", request
   firstTab: (request) -> selectTab "first", request
   lastTab: (request) -> selectTab "last", request
+  tab0: (request) -> selectTabIndex 0, request
+  tab1: (request) -> selectTabIndex 1, request
+  tab2: (request) -> selectTabIndex 2, request
+  tab3: (request) -> selectTabIndex 3, request
+  tab4: (request) -> selectTabIndex 4, request
+  tab5: (request) -> selectTabIndex 5, request
+  tab6: (request) -> selectTabIndex 6, request
+  tab7: (request) -> selectTabIndex 7, request
+  tab8: (request) -> selectTabIndex 8, request
+  tab9: (request) -> selectTabIndex 9, request
   removeTab: ({count, tab}) -> forCountTabs count, tab, (tab) -> chrome.tabs.remove tab.id
   restoreTab: mkRepeatCommand (request, callback) -> chrome.sessions.restore null, callback request
   togglePinTab: ({count, tab}) -> forCountTabs count, tab, (tab) -> chrome.tabs.update tab.id, {pinned: !tab.pinned}
@@ -282,6 +292,16 @@ selectTab = (direction, {count, tab}) ->
           when "last"
             Math.max 0, tabs.length - count
       chrome.tabs.update tabs[toSelect].id, active: true
+
+selectTabIndex = (index, {count, tab}) ->
+  chrome.tabs.query { currentWindow: true }, (tabs) ->
+    if 1 < tabs.length
+      index =
+        if index > 0 && index <= tabs.length
+          index - 1
+        else
+          tabs.length - 1
+      chrome.tabs.update tabs[index].id, active: true
 
 chrome.webNavigation.onCommitted.addListener ({tabId, frameId}) ->
   cssConf =

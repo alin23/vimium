@@ -1,0 +1,146 @@
+bg = #111111
+fg = #fafafa
+
+selectedBgLight = #ffcd99
+selectedBgDark = #2F283A
+
+selectionBgLight = #ffdfbe
+selectionBgDark = #EEB01C
+
+selectedMatchLight = #d13f4e
+selectedMatchDark = #E68753
+
+sourceLight = #db4c51
+sourceDark = #4858B6
+
+matchLight = #ff8d9b
+matchDark = #E44D1F
+
+urlLight = #4996d9
+urlDark = #D9AF49
+
+radius = 4px
+
+
+#vomnibar
+  font-family: Seravek, sans-serif
+  position: fixed
+  z-index: 2139999999
+  top: 8px
+  left: 8px
+  display: block
+  width: calc(100% - 20px)
+  text-align: left
+  border: none
+  border-radius: radius
+  background: bg
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4)
+
+  ol, ul
+    display: none
+    list-style: none
+
+  input
+    font-family: Seravek, "Helvetica Neue", Helvetica, Arial, sans-serif
+    font-size: 24px
+    box-sizing: border-box
+    width: 100%
+    height: 34px
+    margin-bottom: 0
+    padding: 4px
+    color: fg
+    border: none
+    border-radius: radius
+    outline: none
+    background-color: bg
+    box-shadow: none
+
+  .vomnibarSearchArea
+    display: block
+    padding: 12px
+    border-bottom: none
+    border-radius: 4px
+    background-color: bg
+
+  ul
+    padding: 10px 0
+    padding-top: 0
+    list-style: none
+    border-radius: 0 0 radius radius
+    background-color: bg
+
+  li
+    font-size: 16px
+    line-height: 1.2em
+    position: relative
+    display: list-item
+    margin: auto
+    padding: 7px 10px
+    color: black
+    border-bottom: none
+
+  li:last-of-type
+    border-bottom: none
+
+  li .vomnibarTopHalf
+    display: block
+    overflow: hidden
+
+  li .vomnibarBottomHalf
+    display: block
+    overflow: hidden
+    font-size: 15px
+    margin-top: 3px
+    padding: 4px 0
+
+  li .vomnibarIcon
+    padding-left: 20px
+    background-repeat: no-repeat
+    background-position-y: center
+    background-size: 16px
+
+  li .vomnibarSource
+    margin-right: 4px
+    color: sourceDark
+
+  li .vomnibarRelevancy
+    font-family: Iosevka, monospace
+    position: absolute
+    top: 0
+    right: 0
+    overflow: hidden
+    width: 100px
+    padding: 5px
+    color: fg
+    background-color: bg
+
+  li .vomnibarUrl
+    white-space: nowrap
+    color: urlDark
+
+  li.vomnibarSelected .vomnibarMatch
+    color: selectedMatchDark
+
+  li .vomnibarMatch
+    color: matchDark
+
+  li em,
+    li .vomnibarTitle
+    font-weight: normal
+    margin-left: 4px
+    color: #777
+
+  li em
+    font-style: italic
+
+  li.vomnibarSelected
+    font-weight: normal
+    background-color: selectedBgDark
+
+#vomnibarInput::selection
+  background-color: selectionBgDark
+
+.vomnibarNoInsertText
+  visibility: hidden
+
+/*# sourceMappingURL=vomnibar.css.map */

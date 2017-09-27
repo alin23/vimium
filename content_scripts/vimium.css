@@ -1,404 +1,411 @@
-/*
- * Many CSS class names in this file use the verbose "vimiumXYZ" as the class name. This is so we don't
- * use the same CSS class names that the page is using, so the page's CSS doesn't mess with the style of our
- * Vimium dialogs.
- *
- * The z-indexes of Vimium elements are very large, because we always want them to show on top.  We know
- * that Chrome supports z-index values up to about 2^31.  The values we use are large numbers approaching
- * that bound.  However, we must leave headroom for link hints.  Hint marker z-indexes start at 2140000001.
- */
-
-/*
- * This vimiumReset class can be added to any of our UI elements to give it a clean slate. This is useful in
- * case the page has declared a broad rule like "a { padding: 50px; }" which will mess up our UI. These
- * declarations contain more specifiers than necessary to increase their specificity (precedence).
- */
-.vimiumReset,
-div.vimiumReset,
-span.vimiumReset,
-table.vimiumReset,
-a.vimiumReset,
-a:visited.vimiumReset,
-a:link.vimiumReset,
-a:hover.vimiumReset,
-td.vimiumReset,
-tr.vimiumReset {
-  background: none;
-  border: none;
-  bottom: auto;
-  box-shadow: none;
-  color: black;
-  cursor: auto;
-  display: inline;
-  float: none;
-  font-family : "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+.vimiumReset, div.vimiumReset, span.vimiumReset, table.vimiumReset {
+  font-family: "Seravek", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
   font-size: inherit;
+  font-weight: normal;
   font-style: normal;
   font-variant: normal;
-  font-weight: normal;
-  height: auto;
-  left: auto;
-  letter-spacing: 0;
   line-height: 100%;
-  margin: 0;
-  max-height: none;
-  max-width: none;
-  min-height: 0;
-  min-width: 0;
-  opacity: 1;
-  padding: 0;
   position: static;
-  right: auto;
-  text-align: left;
-  text-decoration: none;
-  text-indent: 0;
-  text-shadow: none;
-  text-transform: none;
+  z-index: 2140000000;
   top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  display: inline;
+  float: none;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  cursor: auto;
+  text-align: left;
   vertical-align: baseline;
   white-space: normal;
-  width: auto;
-  z-index: 2140000000; /* Vimium's reference z-index value. */
-}
+  text-decoration: none;
+  text-indent: 0;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+  color: black;
+  border: none;
+  background: none;
+  box-shadow: none;
+  text-shadow: none; }
 
-thead.vimiumReset, tbody.vimiumReset {
-  display: table-header-group;
-}
+a.vimiumReset, a:visited.vimiumReset, a:link.vimiumReset, a:hover.vimiumReset {
+  font-family: "Seravek", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: inherit;
+  font-weight: normal;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 100%;
+  position: static;
+  z-index: 2140000000;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  display: inline;
+  float: none;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  cursor: auto;
+  text-align: left;
+  vertical-align: baseline;
+  white-space: normal;
+  text-decoration: none;
+  text-indent: 0;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+  color: black;
+  border: none;
+  background: none;
+  box-shadow: none;
+  text-shadow: none; }
+
+td.vimiumReset, tr.vimiumReset {
+  font-family: "Seravek", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+  font-size: inherit;
+  font-weight: normal;
+  font-style: normal;
+  font-variant: normal;
+  line-height: 100%;
+  position: static;
+  z-index: 2140000000;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  display: inline;
+  float: none;
+  width: auto;
+  min-width: 0;
+  max-width: none;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  cursor: auto;
+  text-align: left;
+  vertical-align: baseline;
+  white-space: normal;
+  text-decoration: none;
+  text-indent: 0;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 1;
+  color: black;
+  border: none;
+  background: none;
+  box-shadow: none;
+  text-shadow: none; }
+
+thead.vimiumReset {
+  display: table-header-group; }
 
 tbody.vimiumReset {
-  display: table-row-group;
-}
-
-/* Linkhints CSS */
+  display: table-header-group;
+  display: table-row-group; }
 
 div.internalVimiumHintMarker {
+  font-size: 11px;
   position: absolute;
-  display: block;
   top: -1px;
   left: -1px;
-  white-space: nowrap;
+  display: block;
   overflow: hidden;
-  font-size: 11px;
-  padding: 1px 3px 0px 3px;
-  background: linear-gradient(to bottom, #FFF785 0%,#FFC542 100%);
-  border: solid 1px #C38A22;
+  padding: 5px;
+  white-space: nowrap;
+  border: none;
   border-radius: 3px;
-  box-shadow: 0px 3px 7px 0px rgba(0, 0, 0, 0.3);
-}
-
-div.internalVimiumHintMarker span {
-  color: #302505;
-  font-family: Helvetica, Arial, sans-serif;
-  font-weight: bold;
-  font-size: 11px;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-div.internalVimiumHintMarker > .matchingCharacter {
-  color: #D4AC3A;
-}
-
+  background: #ffaf0f;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2); }
+  div.internalVimiumHintMarker span {
+    font-family: Seravek, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: bold;
+    color: #111;
+    text-shadow: none; }
+  div.internalVimiumHintMarker > .matchingCharacter {
+    color: #845f82; }
 div > .vimiumActiveHintMarker span {
-  color: #A07555 !important;
-}
-
-/* Input hints CSS */
-
+  color: #333 !important; }
 div.internalVimiumInputHint {
   position: absolute;
   display: block;
-  background-color: rgba(255, 247, 133, 0.3);
-  border: solid 1px #C38A22;
   pointer-events: none;
-}
-
+  border: solid 1px #c38a22;
+  background-color: rgba(255, 247, 133, 0.3); }
 div.internalVimiumSelectedInputHint {
-  background-color: rgba(255, 102, 102, 0.3);
-  border: solid 1px #993333 !important;
-}
-
-div.internalVimiumSelectedInputHint span {
-  color: white !important;
-}
-
-/* Frame Highlight Marker CSS*/
+  border: solid 1px #933 !important;
+  background-color: rgba(255, 102, 102, 0.3); }
+  div.internalVimiumSelectedInputHint span {
+    color: white !important; }
 div.vimiumHighlightedFrame {
   position: fixed;
-  top: 0px;
-  left: 0px;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
   width: 100%;
   height: 100%;
-  padding: 0px;
-  margin: 0px;
-  border: 5px solid yellow;
-  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
   pointer-events: none;
-}
-
-/* Help Dialog CSS */
+  border: 5px solid #ffaf0f; }
 
 iframe.vimiumHelpDialogFrame {
-  background-color: rgba(10,10,10,0.6);
-  padding: 0px;
-  top: 0px;
-  left: 0px;
+  position: fixed;
+  z-index: 2139999997;
+  top: 0;
+  left: 0;
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
-  position: fixed;
+  padding: 0;
   border: none;
-  z-index: 2139999997; /* Three less than the reference value. */
-}
+  background-color: rgba(10, 10, 10, 0.8); }
 
 div#vimiumHelpDialogContainer {
-  opacity:1.0;
-  background-color:white;
-  border:2px solid #b3b3b3;
-  border-radius:6px;
+  overflow-x: auto;
+  overflow-y: auto;
   width: 840px;
   max-width: calc(100% - 100px);
   max-height: calc(100% - 100px);
   margin: 50px auto;
-  overflow-y: auto;
-  overflow-x: auto;
-}
-
+  padding: 10px;
+  opacity: 1;
+  border: none;
+  border-radius: 6px;
+  background-color: white; }
 div#vimiumHelpDialog {
   min-width: 600px;
-  padding:8px 12px;
-}
+  padding: 8px 12px; }
 
-span#vimiumTitle, span#vimiumTitle span,  span#vimiumTitle * { font-size:20px; }
+span#vimiumTitle {
+  font-size: 20px; }
+  span#vimiumTitle span, span#vimiumTitle * {
+    font-size: 20px; }
+
 #vimiumTitle {
-  display: block;
   line-height: 130%;
-  white-space: nowrap;
-}
+  display: block;
+  white-space: nowrap; }
+
 td.vimiumHelpDialogTopButtons {
   width: 100%;
-  text-align: right;
-}
+  text-align: right; }
+
 #helpDialogOptionsPage, #helpDialogWikiPage {
   font-size: 14px;
-  padding-left: 5px;
   padding-right: 5px;
-}
+  padding-left: 5px; }
+
 div.vimiumColumn {
-  width:50%;
-  float:left;
   font-size: 11px;
   line-height: 130%;
-}
-
-div.vimiumColumn tr {
-    display: table-row;
-}
-
-div.vimiumColumn td {
-    display: table-cell;
+  float: left;
+  width: 50%; }
+  div.vimiumColumn tr {
+    display: table-row; }
+  div.vimiumColumn td {
     font-size: 11px;
     line-height: 130%;
-}
-div.vimiumColumn table, div.vimiumColumn td, div.vimiumColumn tr { padding:0; margin:0; }
-div.vimiumColumn table { width:100%; table-layout:auto; }
-div.vimiumColumn td { vertical-align:top; padding:1px; }
+    display: table-cell; }
+  div.vimiumColumn table, div.vimiumColumn td, div.vimiumColumn tr {
+    margin: 0;
+    padding: 0; }
+  div.vimiumColumn table {
+    width: 100%;
+    table-layout: auto; }
+  div.vimiumColumn td {
+    padding: 1px;
+    vertical-align: top; }
 div#vimiumHelpDialog div.vimiumColumn tr > td:first-of-type {
-  /* This is the "key" column, e.g. "j", "gg". */
-  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size:14px;
-  text-align:right;
-  white-space:nowrap;
-}
+  font-family: Seravek, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  text-align: right;
+  white-space: nowrap; }
+
 span.vimiumHelpDialogKey {
-  background-color: rgb(243,243,243);
-  color: rgb(33,33,33);
+  font-family: Iosevka, monospace;
+  font-size: 12px;
   margin-left: 2px;
   padding-top: 1px;
+  padding-right: 4px;
   padding-bottom: 1px;
   padding-left: 4px;
-  padding-right: 4px;
+  color: #111;
+  border: none;
   border-radius: 3px;
-  border: solid 1px #ccc;
-  border-bottom-color: #bbb;
-  box-shadow: inset 0 -1px 0 #bbb;
-  font-family: monospace;
-  font-size: 11px;
-}
-/* Make the description column as wide as it can be. */
-div#vimiumHelpDialog div.vimiumColumn tr > td:nth-of-type(3) { width:100%; }
+  background-color: #ffaf0f;
+  box-shadow: 0 2px 2px #aaa; }
+
+div#vimiumHelpDialog div.vimiumColumn tr > td:nth-of-type(3) {
+  width: 100%; }
 div#vimiumHelpDialog div.vimiumDivider {
   display: block;
-  height:1px;
-  width:100%;
-  margin:10px auto;
-  background-color:#9a9a9a;
-}
+  width: 70%;
+  height: 1px;
+  margin: 16px auto;
+  background-color: #f0f0f0; }
 div#vimiumHelpDialog td.vimiumHelpSectionTitle {
-  padding-top:3px;
-  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size:16px;
-  font-weight:bold;
-}
+  font-family: Seravek, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  padding-top: 3px; }
 div#vimiumHelpDialog td.vimiumHelpDescription {
-  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
-  font-size:14px;
-}
+  font-family: Seravek, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  color: #333; }
 div#vimiumHelpDialog span.vimiumCopyCommandNameName {
-  font-style: italic;
-  cursor: pointer;
   font-size: 12px;
-}
-/* Advanced commands are hidden by default until you show them. */
-div#vimiumHelpDialog tr.advanced { display: none; }
-div#vimiumHelpDialog.showAdvanced tr.advanced { display: table-row; }
-div#vimiumHelpDialog div.advanced td:nth-of-type(3) { color: #555; }
-div#vimiumHelpDialog a.closeButton {
-  font-family:"courier new";
-  font-weight:bold;
-  color:#555;
-  text-decoration:none;
-  font-size:24px;
-  position: relative;
-  top: 3px;
-  padding-left: 5px;
-}
+  font-style: italic;
+  cursor: pointer; }
+div#vimiumHelpDialog tr.advanced {
+  display: none; }
+div#vimiumHelpDialog.showAdvanced tr.advanced {
+  display: table-row; }
+div#vimiumHelpDialog div.advanced td:nth-of-type(3) {
+  color: #777; }
 div#vimiumHelpDialog a {
-  text-decoration: underline;
-}
-
-div#vimiumHelpDialog a.closeButton:hover {
-  color:black;
-  -webkit-user-select:none;
-}
+  text-decoration: none; }
+  div#vimiumHelpDialog a.closeButton {
+    font-family: Iosevka, "courier new";
+    font-size: 24px;
+    font-weight: bold;
+    position: relative;
+    top: 3px;
+    padding-left: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #aaa; }
+    div#vimiumHelpDialog a.closeButton:hover {
+      -webkit-user-select: none;
+      color: #ffaf0f; }
 div#vimiumHelpDialogFooter {
-  display: block;
   position: relative;
-  margin-bottom: 37px;
-}
+  display: block;
+  margin-bottom: 37px; }
+
 table.helpDialogBottom {
-  width:100%;
-}
+  width: 100%; }
+
 td.helpDialogBottomRight {
-  width:100%;
-  float:right;
+  float: right;
+  width: 100%;
   text-align: right;
-}
-td.helpDialogBottomRight, td.helpDialogBottomLeft {
-  padding: 0px;
-}
-div#vimiumHelpDialogFooter * { font-size:10px; }
+  padding: 0; }
+td.helpDialogBottomLeft {
+  padding: 0; }
+
+div#vimiumHelpDialogFooter * {
+  font-size: 10px; }
+
 a#toggleAdvancedCommands, span#help-dialog-tip {
+  font-family: Seravek;
+  font-size: 10px;
   position: relative;
   top: 19px;
-  white-space: nowrap;
-  font-size: 10px;
-}
-a:link.vimiumHelDialogLink, a:visited.vimiumHelDialogLink,
-  a:hover.vimiumHelDialogLink, a:active.vimiumHelDialogLink, a#toggleAdvancedCommands {
-    color:#2f508e;
-    text-decoration: underline;
-}
+  white-space: nowrap; }
 
-/* Vimium HUD CSS */
+a:link.vimiumHelDialogLink, a:visited.vimiumHelDialogLink, a:hover.vimiumHelDialogLink, a:active.vimiumHelDialogLink, a#toggleAdvancedCommands {
+  cursor: pointer;
+  text-decoration: none;
+  color: #4996d9; }
 
 div.vimiumHUD {
-  display: block;
+  font-family: Seravek, "Lucida Grande", "Arial", "Sans";
+  font-size: 12px;
+  line-height: 1;
   position: fixed;
-  bottom: 0px;
-  /* Keep this far enough to the right so that it doesn't collide with the "popups blocked" chrome HUD. */
-  right: 0px;
-  color: black;
+  right: 0;
+  bottom: 0;
+  display: block;
+  width: auto;
+  min-width: 150px;
+  max-width: 400px;
   height: auto;
   min-height: 13px;
-  width: auto;
-  max-width: 400px;
-  min-width: 150px;
-  text-align: left;
-  background-color: #ebebeb;
-  padding: 3px 3px 2px 3px;
   margin: 0;
-  border: 1px solid #b3b3b3;
-  border-radius: 4px 4px 0 0;
-  font-family: "Lucida Grande", "Arial", "Sans";
-  font-size: 12px;
-  text-shadow: 0px 1px 2px #FFF;
-  line-height: 1.0;
-}
+  padding: 3px 3px 2px 3px;
+  text-align: left;
+  color: black;
+  border: none;
+  border-radius: 4px 4px;
+  background-color: white;
+  text-shadow: none; }
 
 iframe.vimiumHUDFrame {
-  display: block;
-  background: none;
   position: fixed;
-  bottom: 0px;
+  z-index: 2149999998;
   right: 150px;
-  height: 20px;
-  min-height: 20px;
+  bottom: 0;
+  display: block;
   width: 450px;
   min-width: 150px;
-  padding: 0px;
+  height: 20px;
+  min-height: 20px;
   margin: 0;
-  border: none;
-  z-index: 2149999998; /* Two less than the reference value. */
+  padding: 0;
   opacity: 0;
-}
+  border: none;
+  background: none; }
 
 div.vimiumHUD span#hud-find-input, div.vimiumHUD span#hud-match-count {
   display: inline;
-  outline: none;
-  white-space: nowrap;
   overflow-y: hidden;
-}
-
+  white-space: nowrap;
+  outline: none; }
 div.vimiumHUD span#hud-find-input br {
-  display: none;
-}
-
+  display: none; }
 div.vimiumHUD span#hud-find-input * {
   display: inline;
-  white-space: nowrap;
-}
+  white-space: nowrap; }
 
 body.vimiumFindMode ::selection {
-  background: #ff9632;
-}
-
-/* Vomnibar Frame CSS */
+  background: #ff9632; }
 
 iframe.vomnibarFrame {
-  background-color: transparent;
-  padding: 0px;
-  overflow: hidden;
-
-  display: block;
+  font-family: sans-serif;
   position: fixed;
-  width: calc(80% + 20px); /* same adjustment as in pages/vomnibar.coffee */
-  min-width: 400px;
-  height: calc(100% - 70px);
+  z-index: 2149999998;
   top: 70px;
   left: 50%;
+  display: block;
+  overflow: hidden;
+  width: calc(80% + 20px);
+  min-width: 400px;
+  height: calc(100% - 70px);
   margin: 0 0 0 -40%;
+  padding: 0;
   border: none;
-  font-family: sans-serif;
-  z-index: 2149999998; /* Two less than the reference value. */
-}
+  border-radius: 4px;
+  background-color: transparent; }
 
 div.vimiumFlash {
-  box-shadow: 0px 0px 4px 2px #4183C4;
-  padding: 1px;
-  background-color: transparent;
   position: absolute;
   z-index: 2140000000;
-}
+  padding: 1px;
+  background-color: transparent;
+  box-shadow: 0 0 4px 2px #4183c4; }
 
-/* UIComponent CSS */
 iframe.vimiumUIComponentHidden {
-  display: none;
-}
-
+  display: none; }
 iframe.vimiumUIComponentVisible {
-  display: block;
-}
-
+  display: block; }
 iframe.vimiumUIComponentReactivated {
-  border: 5px solid yellow;
-}
+  border: 5px solid #ffaf0f; }
+
+/*# sourceMappingURL=vimium.css.map */
