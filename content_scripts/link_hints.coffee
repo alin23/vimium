@@ -46,9 +46,28 @@ DOWNLOAD_LINK_URL =
   name: "download"
   indicator: "Download link URL"
   clickModifiers: altKey: true, ctrlKey: false, metaKey: false
+COPY_LINK_TEXT =
+  name: "copy-link-text"
+  indicator: "Copy link text"
+  linkActivator: (link) ->
+    text = link.textContent
+    if 0 < text.length
+      HUD.copyToClipboard text
+      text = text[0..25] + "...." if 28 < text.length
+      HUD.showForDuration "Yanked #{text}", 2000
+    else
+      HUD.showForDuration "No text to yank.", 2000
+HOVER_LINK =
+  name: "hover"
+  indicator: "Hover link"
+  linkActivator: (link) -> new HoverMode link
+FOCUS_LINK =
+  name: "focus"
+  indicator: "Focus link"
+  linkActivator: (link) -> link.focus()
 
 availableModes = [OPEN_IN_CURRENT_TAB, OPEN_IN_NEW_BG_TAB, OPEN_IN_NEW_FG_TAB, OPEN_WITH_QUEUE, COPY_LINK_URL,
-  OPEN_INCOGNITO, DOWNLOAD_LINK_URL]
+  OPEN_INCOGNITO, DOWNLOAD_LINK_URL, COPY_LINK_TEXT, HOVER_LINK, FOCUS_LINK]
 
 HintCoordinator =
   onExit: []
@@ -125,8 +144,14 @@ HintCoordinator =
     @linkHintsMode = @localHints = null
 
 LinkHints =
-  activateMode: (count = 1, {mode}) ->
+  activateMode: (count = 1, {mode, registryEntry}) ->
     mode ?= OPEN_IN_CURRENT_TAB
+    # Handle modes which are only accessible via command options.
+    switch registryEntry?.options.action
+      when "copy-text" then mode = COPY_LINK_TEXT
+      when "hover" then mode = HOVER_LINK
+      when "focus" then mode = FOCUS_LINK
+    #
     if 0 < count or mode is OPEN_WITH_QUEUE
       HintCoordinator.prepareToActivateMode mode, (isSuccess) ->
         if isSuccess
@@ -372,7 +397,7 @@ class LinkHintsMode
             Utils.nextTick -> focusThisFrame highlight: true
           else if localHintDescriptor.reason == "Scroll."
             # Tell the scroller that this is the activated element.
-            handlerStack.bubbleEvent "DOMActivate", target: clickEl
+            handlerStack.bubbleEvent (if Utils.isFirefox() then "click" else "DOMActivate"), target: clickEl
           else if localHintDescriptor.reason == "Open."
             clickEl.open = !clickEl.open
           else if DomUtils.isSelectable clickEl
@@ -381,8 +406,12 @@ class LinkHintsMode
           else
             clickActivator = (modifiers) -> (link) -> DomUtils.simulateClick link, modifiers
             linkActivator = @mode.linkActivator ? clickActivator @mode.clickModifiers
-            # TODO: Are there any other input elements which should not receive focus?
-            if clickEl.nodeName.toLowerCase() in ["input", "select"] and clickEl.type not in ["button", "submit"]
+            # Note(gdh1995): Here we should allow special elements to get focus,
+            # <select>: latest Chrome refuses `mousedown` event, and we can only
+            #     focus it to let user press space to activate the popup menu
+            # <object> & <embed>: for Flash games which have their own key event handlers
+            #     since we have been able to blur them by pressing `Escape`
+            if clickEl.nodeName.toLowerCase() in ["input", "select", "object", "embed"]
               clickEl.focus()
             linkActivator clickEl
 
@@ -633,8 +662,8 @@ LocalHints =
           visibleElements.push areasAndRects...
 
     # Check aria properties to see if the element should be ignored.
-    if (element.getAttribute("aria-hidden")?.toLowerCase() in ["", "true"] or
-        element.getAttribute("aria-disabled")?.toLowerCase() in ["", "true"])
+    # Note that we're showing hints for elements with aria-hidden=true. See #3501 for discussion.
+    if (element.getAttribute("aria-disabled")?.toLowerCase() in ["", "true"])
       return [] # This element should never have a link hint.
 
     # Check for AngularJS listeners on the element.
@@ -688,6 +717,8 @@ LocalHints =
                              (element.readOnly and DomUtils.isSelectable element))
       when "button", "select"
         isClickable ||= not element.disabled
+      when "object", "embed"
+        isClickable = true
       when "label"
         isClickable ||= element.control? and not element.control.disabled and
                         (@getVisibleClickable element.control).length == 0
@@ -723,8 +754,8 @@ LocalHints =
     # Elements with tabindex are sometimes useful, but usually not. We can treat them as second class
     # citizens when it improves UX, so take special note of them.
     tabIndexValue = element.getAttribute("tabindex")
-    tabIndex = if tabIndexValue == "" then 0 else parseInt tabIndexValue
-    unless isClickable or isNaN(tabIndex) or tabIndex < 0
+    tabIndex = if tabIndexValue then parseInt tabIndexValue else -1
+    unless isClickable or tabIndex < 0 or isNaN(tabIndex)
       isClickable = onlyHasTabIndex = true
 
     if isClickable
@@ -736,6 +767,24 @@ LocalHints =
     visibleElements
 
   #
+  # Returns element at a given (x,y) with an optional root element.
+  # If the returned element is a shadow root, call the function use that recursively
+  # until we hit an actual element.
+  #
+  getElementFromPoint: (x, y, root = document, stack = []) ->
+    element = if root.elementsFromPoint then root.elementsFromPoint(x, y)[0] else root.elementFromPoint(x, y)
+
+    if stack.indexOf(element) != -1
+      return element
+
+    stack.push(element)
+
+    if element and element.shadowRoot
+      return LocalHints.getElementFromPoint(x, y, element.shadowRoot, stack)
+
+    return element
+
+  #
   # Returns all clickable elements that are not hidden and are in the current viewport, along with rectangles
   # at which (parts of) the elements are displayed.
   # In the process, we try to find rects where elements do not overlap so that link hints are unambiguous.
@@ -745,7 +794,14 @@ LocalHints =
   getLocalHints: (requireHref) ->
     # We need documentElement to be ready in order to find links.
     return [] unless document.documentElement
-    elements = document.documentElement.getElementsByTagName "*"
+    # Find all elements, recursing into shadow DOM if present.
+    getAllElements = (root, elements = []) ->
+      for element in root.querySelectorAll "*"
+        elements.push element
+        if element.shadowRoot
+          getAllElements(element.shadowRoot, elements)
+      elements
+    elements = getAllElements document.documentElement
     visibleElements = []
 
     # The order of elements here is important; they should appear in the order they are in the DOM, so that
@@ -779,34 +835,41 @@ LocalHints =
           false # This is not a false positive.
         element
 
-    # TODO(mrmr1993): Consider z-index. z-index affects behaviour as follows:
-    #  * The document has a local stacking context.
-    #  * An element with z-index specified
-    #    - sets its z-order position in the containing stacking context, and
-    #    - creates a local stacking context containing its children.
-    #  * An element (1) is shown above another element (2) if either
-    #    - in the last stacking context which contains both an ancestor of (1) and an ancestor of (2), the
-    #      ancestor of (1) has a higher z-index than the ancestor of (2); or
-    #    - in the last stacking context which contains both an ancestor of (1) and an ancestor of (2),
-    #        + the ancestors of (1) and (2) have equal z-index, and
-    #        + the ancestor of (1) appears later in the DOM than the ancestor of (2).
-    #
-    # Remove rects from elements where another clickable element lies above it.
+    # This loop will check if any corner or center of element is clickable
+    # document.elementFromPoint will find an element at a x,y location.
+    # Node.contain checks to see if an element contains another. note: someNode.contains(someNode) === true
+    # If we do not find our element as a descendant of any element we find, assume it's completely covered.
+
     localHints = nonOverlappingElements = []
     while visibleElement = visibleElements.pop()
-      rects = [visibleElement.rect]
-      for {rect: negativeRect} in visibleElements
-        # Subtract negativeRect from every rect in rects, and concatenate the arrays of rects that result.
-        rects = [].concat (rects.map (rect) -> Rect.subtract rect, negativeRect)...
-      if rects.length > 0
-        nonOverlappingElements.push extend visibleElement, rect: rects[0]
-      else
-        # Every part of the element is covered by some other element, so just insert the whole element's
-        # rect. Except for elements with tabIndex set (second class citizens); these are often more trouble
-        # than they're worth.
-        # TODO(mrmr1993): This is probably the wrong thing to do, but we don't want to stop being able to
-        # click some elements that we could click before.
-        nonOverlappingElements.push visibleElement unless visibleElement.secondClassCitizen
+      if visibleElement.secondClassCitizen
+        continue
+
+      rect = visibleElement.rect
+      element = visibleElement.element
+
+      # Check middle of element first, as this is perhaps most likely to return true.
+      elementFromMiddlePoint = LocalHints.getElementFromPoint(rect.left + (rect.width * 0.5), rect.top + (rect.height * 0.5))
+      if elementFromMiddlePoint && (element.contains(elementFromMiddlePoint) or elementFromMiddlePoint.contains(element))
+        nonOverlappingElements.push visibleElement
+        continue
+
+      # If not in middle, try corners.
+      # Adjusting the rect by 0.1 towards the upper left, which empirically fixes some cases where another
+      # element would've been found instead. NOTE(philc): This isn't well explained. Originated in #2251.
+      verticalCoordinates = [rect.top + 0.1, rect.bottom - 0.1]
+      horizontalCoordinates = [rect.left + 0.1, rect.right - 0.1]
+
+      foundElement = false
+      for verticalCoordinate in verticalCoordinates
+        for horizontalCoordinate in horizontalCoordinates
+          elementFromPoint = LocalHints.getElementFromPoint(verticalCoordinate, horizontalCoordinate)
+          if elementFromPoint && (element.contains(elementFromPoint) or elementFromPoint.contains(element))
+            foundElement = true
+            break
+        if foundElement
+          nonOverlappingElements.push visibleElement
+          break;
 
     # Position the rects within the window.
     {top, left} = DomUtils.getViewportTopLeft()
@@ -889,6 +952,12 @@ class WaitForEnter extends Mode
         else if KeyboardUtils.isEscape event
           @exit()
           callback false # false -> isSuccess.
+
+class HoverMode extends Mode
+  constructor: (@link) ->
+    DomUtils.simulateHover @link
+    super name: "hover-mode", singleton: "hover-mode", exitOnEscape: true
+    @onExit => DomUtils.simulateUnhover @link
 
 root = exports ? (window.root ?= {})
 root.LinkHints = LinkHints

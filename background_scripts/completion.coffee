@@ -50,6 +50,11 @@ class Suggestion
     insertTextIndicator = "&#8618;" # A right hooked arrow.
     @title = @insertText if @insertText and request.isCustomSearch
     # NOTE(philc): We're using these vimium-specific class names so we don't collide with the page's CSS.
+    favIcon =
+      if @type == "tab" and not Utils.isFirefox()
+        """<img class="vimiumReset vomnibarIcon" src="chrome://favicon/size/16@1x/#{BgUtils.escapeAttribute @url}" />"""
+      else
+        ""
     @html =
       if request.isCustomSearch
         """
@@ -66,7 +71,7 @@ class Suggestion
            <span class="vimiumReset vomnibarTitle">#{@highlightQueryTerms Utils.escapeHtml @title}</span>
          </div>
          <div class="vimiumReset vomnibarBottomHalf">
-          <span class="vimiumReset vomnibarSource vomnibarNoInsertText">#{insertTextIndicator}</span><span class="vimiumReset vomnibarUrl">#{@highlightUrlTerms Utils.escapeHtml @shortenUrl()}</span>
+          <span class="vimiumReset vomnibarSource vomnibarNoInsertText">#{insertTextIndicator}</span>#{favIcon}<span class="vimiumReset vomnibarUrl">#{@highlightUrlTerms Utils.escapeHtml @shortenUrl()}</span>
           #{relevancyHtml}
         </div>
         """
@@ -358,20 +363,35 @@ class DomainCompleter
 
 # Searches through all open tabs, matching on title and URL.
 class TabCompleter
-  filter: ({ queryTerms }, onComplete) ->
+  filter: ({ name, queryTerms }, onComplete) ->
+    if name != "tabs" && queryTerms.length == 0
+      return onComplete []
     # NOTE(philc): We search all tabs, not just those in the current window. I'm not sure if this is the
     # correct UX.
     chrome.tabs.query {}, (tabs) =>
       results = tabs.filter (tab) -> RankingUtils.matches(queryTerms, tab.url, tab.title)
       suggestions = results.map (tab) =>
-        new Suggestion
+        suggestion = new Suggestion
           queryTerms: queryTerms
           type: "tab"
           url: tab.url
           title: tab.title
-          relevancyFunction: @computeRelevancy
           tabId: tab.id
           deDuplicate: false
+        suggestion.relevancy = @computeRelevancy suggestion
+        suggestion
+      .sort (a,b) -> b.relevancy - a.relevancy
+      # Boost relevancy with a multiplier so a relevant tab doesn't
+      # get crowded out by results from competing completers. To
+      # prevent tabs from crowding out everything else in turn,
+      # penalize them for being further down the results list by
+      # scaling on a hyperbola starting at 1 and approaching 0
+      # asymptotically for higher indexes. The multiplier and the
+      # curve fall-off were objectively chosen on the grounds that
+      # they seem to work pretty well.
+      suggestions.forEach (suggestion,i) ->
+        suggestion.relevancy *= 8
+        suggestion.relevancy /= ( i / 4 + 1 )
       onComplete suggestions
 
   computeRelevancy: (suggestion) ->

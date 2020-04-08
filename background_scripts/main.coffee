@@ -43,6 +43,7 @@ completers =
     completionSources.bookmarks
     completionSources.history
     completionSources.domains
+    completionSources.tabs
     completionSources.searchEngines
     ]
   bookmarks: new MultiCompleter [completionSources.bookmarks]
@@ -97,15 +98,32 @@ do ->
 TabOperations =
   # Opens the url in the current tab.
   openUrlInCurrentTab: (request) ->
-    chrome.tabs.update request.tabId, url: Utils.convertToUrl request.url
+    if Utils.hasJavascriptPrefix request.url
+      {tabId, frameId} = request
+      chrome.tabs.sendMessage tabId, {frameId, name: "executeScript", script: request.url}
+    else
+      chrome.tabs.update request.tabId, url: Utils.convertToUrl request.url
 
   # Opens request.url in new tab and switches to it.
   openUrlInNewTab: (request, callback = (->)) ->
     tabConfig =
       url: Utils.convertToUrl request.url
-      index: request.tab.index + 1
       active: true
       windowId: request.tab.windowId
+    { position } = request
+
+    tabIndex = null
+    # TODO(philc): Convert to a switch statement ES6.
+    switch position
+      when "start" then tabIndex = 0
+      when "before" then tabIndex = request.tab.index
+      # if on Chrome or on Firefox but without openerTabId, `tabs.create` opens a tab at the end.
+      # but on Firefox and with openerTabId, it opens a new tab next to the opener tab
+      when "end" then tabIndex = (if Utils.isFirefox() then 9999 else null)
+      # "after" is the default case when there are no options.
+      else tabIndex = request.tab.index + 1
+    tabConfig.index = tabIndex
+
     tabConfig.active = request.active if request.active?
     # Firefox does not support "about:newtab" in chrome.tabs.create.
     delete tabConfig["url"] if tabConfig["url"] == Settings.defaults.newTabUrl
@@ -115,7 +133,8 @@ TabOperations =
     tabConfig.openerTabId = request.tab.id if canUseOpenerTabId
 
     chrome.tabs.create tabConfig, (tab) ->
-      callback extend request, {tab, tabId: tab.id}
+      # clean position and active, so following `openUrlInNewTab(request)` will create a tab just next to this new tab
+      callback extend request, {tab, tabId: tab.id, position: "", active: false}
 
   # Opens request.url in new window and switches to it.
   openUrlInNewWindow: (request, callback = (->)) ->
@@ -202,6 +221,7 @@ BackgroundCommands =
       chrome.windows.create windowConfig, -> callback request
     else
       urls = request.urls[..].reverse()
+      request.position ?= request.registryEntry.options.position
       do openNextUrl = (request) ->
         if 0 < urls.length
           TabOperations.openUrlInNewTab (extend request, {url: urls.pop()}), openNextUrl
@@ -347,6 +367,7 @@ Frames =
 
   registerFrame: ({tabId, frameId, port}) ->
     frameIdsForTab[tabId].push frameId unless frameId in frameIdsForTab[tabId] ?= []
+    (portsForTab[tabId] ?= {})[frameId] = port
 
   unregisterFrame: ({tabId, frameId, port}) ->
     # Check that the port trying to unregister the frame hasn't already been replaced by a new frame
@@ -531,7 +552,7 @@ do showUpgradeMessage = ->
             chrome.notifications.onClicked.addListener (id) ->
               if id == notificationId
                 chrome.tabs.query { active: true, currentWindow: true }, ([tab]) ->
-                  TabOperations.openUrlInNewTab {tab, tabId: tab.id, url: "https://github.com/philc/vimium#release-notes"}
+                  TabOperations.openUrlInNewTab {tab, tabId: tab.id, url: "https://github.com/philc/vimium/blob/master/CHANGELOG.md"}
       else
         # We need to wait for the user to accept the "notifications" permission.
         chrome.permissions.onAdded.addListener showUpgradeMessage

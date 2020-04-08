@@ -10,11 +10,6 @@ class UIComponent
     @iframeElement.classList.remove removeClass
     unless @iframeElement.classList.contains addClass
       @iframeElement.classList.add addClass
-      if addClass == "vimiumUIComponentVisible"
-        # Force the re-computation of styles, so Chrome sends a visibility change message to the child frame.
-        # This is required to solve focusing issues since Chrome 74. See
-        # https://github.com/philc/vimium/pull/3277#issuecomment-487363284
-        getComputedStyle(@iframeElement).display
 
   constructor: (iframeUrl, className, @handleMessage) ->
     DomUtils.documentReady =>
@@ -32,8 +27,11 @@ class UIComponent
         className: className
         seamless: "seamless"
       shadowWrapper = DomUtils.createElement "div"
-      # PhantomJS doesn't support createShadowRoot, so guard against its non-existance.
-      @shadowDOM = shadowWrapper.attachShadow?( mode: "open" )
+      # Firefox doesn't support createShadowRoot, so guard against its non-existance.
+      # https://hacks.mozilla.org/2018/10/firefox-63-tricks-and-treats/ says
+      # Firefox 63 has enabled Shadow DOM v1 by default
+      @shadowDOM = shadowWrapper.attachShadow?( mode: "open" ) ?
+        shadowWrapper.createShadowRoot?() ? shadowWrapper
       @shadowDOM.appendChild styleSheet
       @shadowDOM.appendChild @iframeElement
       @toggleIframeElementClasses "vimiumUIComponentVisible", "vimiumUIComponentHidden"
@@ -61,15 +59,18 @@ class UIComponent
                       @hide false
                     false # We will not be calling sendResponse.
                   # If this frame receives the focus, then hide the UI component.
-                  window.addEventListener "focus", (event) =>
+                  window.addEventListener "focus", (forTrusted (event) =>
                     if event.target == window and @options?.focus
                       @hide false
                     true # Continue propagating the event.
+                  ), true
                   # Set the iframe's port, thereby rendering the UI component ready.
                   setIframePort port1
                 when "setIframeFrameId" then @iframeFrameId = event.data.iframeFrameId
                 when "hide" then @hide()
                 else @handleMessage event
+      if Utils.isFirefox()
+          @postMessage name: "settings", isFirefox: true
 
   # Post a message (if provided), then call continuation (if provided).  We wait for documentReady() to ensure
   # that the @iframePort set (so that we can use @iframePort.use()).

@@ -300,7 +300,11 @@ class VisualMode extends KeyHandlerMode
   find: (count, backwards) =>
     initialRange = @selection.getRangeAt(0).cloneRange()
     for [0...count] by 1
-      unless FindMode.execute null, {colorSelection: false, backwards}
+      nextQuery = FindMode.getQuery backwards
+      unless nextQuery
+        HUD.showForDuration "No query to find.", 1000
+        return
+      unless FindMode.execute nextQuery, {colorSelection: false, backwards}
         @movement.setSelectionRange initialRange
         HUD.showForDuration("No matches for '#{FindMode.query.rawQuery}'", 1000)
         return
@@ -326,8 +330,25 @@ class VisualLineMode extends VisualMode
     super extend options, name: "visual/line", indicator: "Visual mode (line)"
     @extendSelection()
 
-  commandHandler: (args...) ->
-    super args...
+  commandHandler: ({command: {command}, count}) ->
+    switch typeof command
+      when "string"
+        for i in [0...count] by 1
+          @movement.runMovement command
+          # If the current selection
+          #  * has only 1 line (the line that is selected when we # enter the visual line mode), and
+          #  * its direction is different from the command,
+          # then the command will in effect unselect that line. In this case, we restore that line and
+          # reverse its direction, keeping that line selected.
+          if @selection.isCollapsed
+            @extendSelection()
+            [direction, granularity] = command.split(' ')
+            if @movement.getDirection() != direction and granularity == "line"
+              @movement.reverseSelection()
+            @movement.runMovement command
+      when "function"
+        command count
+    @movement.scrollIntoView()
     @extendSelection() if @modeIsActive
 
   extendSelection: ->

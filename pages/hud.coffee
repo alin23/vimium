@@ -63,6 +63,7 @@ handlers =
     document.getElementById("hud").innerText = data.text
     document.getElementById("hud").classList.add "vimiumUIComponentVisible"
     document.getElementById("hud").classList.remove "vimiumUIComponentHidden"
+    document.getElementById("hud").classList.remove "hud-find"
   hidden: ->
     # We get a flicker when the HUD later becomes visible again (with new text) unless we reset its contents
     # here.
@@ -72,7 +73,7 @@ handlers =
 
   showFindMode: (data) ->
     hud = document.getElementById "hud"
-    hud.innerText = "/\u200A" # \u200A is a "hair space", to leave enough space before the caret/first char.
+    hud.classList.add "hud-find"
 
     inputElement = document.createElement "span"
     try # NOTE(mrmr1993): Chrome supports non-standard "plaintext-only", which is what we *really* want.
@@ -83,6 +84,12 @@ handlers =
     hud.appendChild inputElement
 
     inputElement.addEventListener "input", executeQuery = (event) ->
+      # On Chrome when IME is on, the order of events is:
+      #   keydown, input.isComposing=true, keydown, input.true, ..., keydown, input.true, compositionend;
+      # while on Firefox, the order is: keydown, input.true, ..., input.true, keydown, compositionend, input.false.
+      # Therefore, check event.isComposing here, to avoid window focus changes during typing with IME,
+      # since such changes will prevent normal typing on Firefox (see #3480)
+      return if Utils.isFirefox() and event.isComposing
       # Replace \u00A0 (&nbsp;) with a normal space.
       findMode.rawQuery = inputElement.textContent.replace "\u00A0", " "
       UIComponentServer.postMessage {name: "search", query: findMode.rawQuery}
@@ -91,7 +98,10 @@ handlers =
     countElement.id = "hud-match-count"
     countElement.style.float = "right"
     hud.appendChild countElement
-    Utils.setTimeout TIME_TO_WAIT_FOR_IPC_MESSAGES, -> inputElement.focus()
+    Utils.setTimeout TIME_TO_WAIT_FOR_IPC_MESSAGES, ->
+      # On Firefox, the page must first be focused before the HUD input element can be focused. #3460.
+      window.focus() if Utils.isFirefox()
+      inputElement.focus()
 
     findMode =
       historyIndex: -1
@@ -122,6 +132,8 @@ handlers =
     focusedElement?.focus()
     window.parent.focus()
     UIComponentServer.postMessage {name: "pasteResponse", data}
+
+  settings: ({ isFirefox }) -> Utils.isFirefox = -> isFirefox
 
 UIComponentServer.registerHandler ({data}) -> handlers[data.name ? data]? data
 FindModeHistory.init()
