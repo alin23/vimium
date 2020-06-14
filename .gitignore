@@ -3,10 +3,6 @@
 *.swp
 *.crx
 *.sublime*
-content_scripts/*.js
-background_scripts/*.js
-lib/*.js
-pages/*.js
 options/*.js
 node_modules/*
 dist

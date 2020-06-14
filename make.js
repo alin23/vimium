@@ -9,7 +9,7 @@ child_process = require("child_process");
 function spawn(procName, optArray, silent = false, sync = false) {
   if (process.platform == "win32") {
     // if win32, prefix arguments with "/c {original command}"
-    // e.g. "coffee -c c:\git\vimium" becomes "cmd.exe /c coffee -c c:\git\vimium"
+    // e.g. "mkdir c:\git\vimium" becomes "cmd.exe /c mkdir c:\git\vimium"
     optArray.unshift("/c", procName)
     procName = "cmd.exe"
   }
@@ -28,19 +28,8 @@ function spawn(procName, optArray, silent = false, sync = false) {
   return proc;
 }
 
-// Compile coffeescript into javascript.
-function build() {
-  coffee = spawn("coffee", ["-c", __dirname], false, true)
-  if (coffee.status != 0) {
-    console.log("Build failed. Coffee exited with status", coffee.status);
-    process.exit(coffee.status);
-  }
-}
-
 // Builds a zip file for submission to the Chrome store. The output is in dist/.
 function buildStorePackage() {
-  build();
-
   const vimiumVersion = JSON.parse(fs.readFileSync("manifest.json").toString())["version"]
 
   spawn("rm", ["-rf", "dist/vimium"], false, true);
@@ -49,7 +38,7 @@ function buildStorePackage() {
   spawn("mkdir", ["-p", "dist/chrome-canary"], false, true);
   spawn("mkdir", ["-p", "dist/firefox"], false, true);
 
-  const blacklist = [".*", "*.coffee", "*.md", "test_harnesses", "tests", "dist", "CREDITS", "node_modules",
+  const blacklist = [".*", "*.md", "test_harnesses", "tests", "dist", "CREDITS", "node_modules",
                      "MIT-LICENSE.txt", "package-lock.json", "make.js"];
   const rsyncOptions = [].concat.apply(
     ["-r", ".", "dist/vimium"],
@@ -57,8 +46,12 @@ function buildStorePackage() {
 
   spawn("rsync", rsyncOptions, false, true);
 
-  const distManifest = "dist/vimium/manifest.json";
-  const manifest = JSON.parse(fs.readFileSync(distManifest).toString());
+  const manifestContents = fs.readFileSync("dist/vimium/manifest.json").toString();
+  const chromeManifest = JSON.parse(manifestContents);
+  const firefoxManifest = JSON.parse(manifestContents);
+  const writeDistManifest = (manifestObject) => {
+    fs.writeFileSync("dist/vimium/manifest.json", JSON.stringify(manifestObject, null, 2));
+  };
 
   // cd into "dist/vimium" before building the zip, so that the files in the zip don't each have the
   // path prefix "dist/vimium".
@@ -66,18 +59,25 @@ function buildStorePackage() {
   // removing the zip file before the build.
   const zipCommand = "cd dist/vimium && zip -r --filesync ";
 
-  // Build the Firefox package first, because afterwards, we modify the manifest.json for the Chrome packages.
+  // Chrome considers this key invalid in manifest.json, so we add it during the build phase.
+  firefoxManifest["browser_specific_settings"] = {
+    gecko: {
+      "strict_min_version": "62.0"
+    }
+  };
+
+  writeDistManifest(firefoxManifest);
   spawn("bash", ["-c", zipCommand + `../firefox/vimium-firefox-${vimiumVersion}.zip .`], false, true);
 
-  // Build the Chrome Store package; this does not require the clipboardWrite permission.
-  manifest.permissions = manifest.permissions.filter((p) => p != "clipboardWrite");
-  fs.writeFileSync(distManifest, JSON.stringify(manifest, null, 2));
+  // Build the Chrome Store package. Chrome does not require the clipboardWrite permission.
+  chromeManifest.permissions = chromeManifest.permissions.filter((p) => p != "clipboardWrite");
+  writeDistManifest(chromeManifest);
   spawn("bash", ["-c", zipCommand + `../chrome-store/vimium-chrome-store-${vimiumVersion}.zip .`], false, true);
 
   // Build the Chrome Store dev package.
-  manifest.name = "Vimium Canary";
-  manifest.description = "This is the development branch of Vimium (it is beta software).";
-  fs.writeFileSync(distManifest, JSON.stringify(manifest, null, 2));
+  chromeManifest.name = "Vimium Canary";
+  chromeManifest.description = "This is the development branch of Vimium (it is beta software).";
+  writeDistManifest(chromeManifest);
   spawn("bash", ["-c", zipCommand + `../chrome-canary/vimium-canary-${vimiumVersion}.zip .`], false, true);
 }
 
@@ -137,15 +137,9 @@ function command(name, helpString, fn) {
 }
 
 command(
-  "build",
-  "compile all coffeescript files to javascript",
-  build);
-
-command(
   "test",
   "Run all tests",
   () => {
-    build();
     let failed = runUnitTests();
     failed += runDomTests();
     if (failed > 0)
@@ -156,7 +150,6 @@ command(
   "test-unit",
   "Run unit tests",
   () => {
-    build();
     const failed = runUnitTests() > 0;
     if (failed > 0)
       Process.exit(1);
@@ -166,17 +159,9 @@ command(
   "test-dom",
   "Run DOM tests",
   () => {
-    build();
     const failed = runDomTests();
     if (failed > 0)
       Process.exit(1);
-  });
-
-command(
-  "autobuild",
-  "continually rebuild coffeescript files using coffee --watch",
-  () => {
-    spawn("coffee", ["-cw", __dirname]);
   });
 
 command(
@@ -186,7 +171,7 @@ command(
 
 if (process.argv.includes("-h") || process.argv.includes("--help") || process.argv.length == 2) {
   printHelpString();
-  return;
+  process.exit(1);
 }
 
 commandArg = process.argv[2]

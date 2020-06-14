@@ -1,9 +1,7 @@
 require("./test_helper.js");
-extend(global, require("../../lib/utils.js"));
-extend(global, require("../../background_scripts/bg_utils.js"));
-extend(global, require("../../background_scripts/completion_engines.js"));
-extend(global, require("../../background_scripts/completion.js"));
-extend(global, require("./test_chrome_stubs.js"));
+require("../../background_scripts/bg_utils.js");
+require("../../background_scripts/completion_engines.js");
+require("../../background_scripts/completion.js");
 
 context("bookmark completer",
   setup(() => {
@@ -368,8 +366,8 @@ context("RankingUtils.wordRelevancy",
   }),
 
   should("score higher in shorter titles", () => {
-    const highScore = RankingUtils.wordRelevancy(["coffee"], "a-url", "Coffeescript");
-    const lowScore  = RankingUtils.wordRelevancy(["coffee"], "a-url", "Coffeescript rocks");
+    const highScore = RankingUtils.wordRelevancy(["milk"], "a-url", "Milkshakes");
+    const lowScore  = RankingUtils.wordRelevancy(["milk"], "a-url", "Milkshakes rocks");
     assert.isTrue(highScore > lowScore);
   }),
 
@@ -537,7 +535,7 @@ context("TabRecency",
 
     fakeTimeDeltaElapsing = () => {
       if (this.tabRecency.lastVisitedTime != null) {
-        this.tabRecency.lastVisitedTime = new Date(this.tabRecency.lastVisitedTime - this.tabRecency.timeDelta);
+        this.tabRecency.lastVisitedTime = new Date(this.tabRecency.lastVisitedTime - BgUtils.TIME_DELTA);
       }
     };
 

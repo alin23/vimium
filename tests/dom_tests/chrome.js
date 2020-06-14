@@ -1,14 +1,8 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 //
 // Mock the Chrome extension API.
 //
 
-const root = typeof exports !== 'undefined' && exports !== null ? exports : window;
+let root = window;
 root.chromeMessages = [];
 
 document.hasFocus = () => true;
